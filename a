@@ -1,0 +1,70 @@
+add a new tkinter text box in the following code that selects which field to use in the line:
+def ran(filepath, dirpath, delimiter, output_thresholds):
+    with open(filepath, 'r') as k:
+        lines = k.readlines()
+
+    output_files = [open(os.path.join(dirpath, f"{threshold}.txt"), "w") for threshold in output_thresholds]
+    output_below_lowest = open(os.path.join(dirpath, f"below{output_thresholds[0]}.txt"), "w")
+
+    for line in lines:
+        value = int(line.split(delimiter)[1])
+
+        if value < output_thresholds[0]:
+            output_below_lowest.write(line)
+        else:
+            for i, threshold in enumerate(output_thresholds):
+                if i == len(output_thresholds) - 1:  # Last threshold
+                    if value >= threshold:
+                        output_files[i].write(line)
+                        break
+                elif threshold <= value < output_thresholds[i + 1]:
+                    output_files[i].write(line)
+                    break
+
+    output_below_lowest.close()
+    for output_file in output_files:
+        output_file.close()
+
+def browse_folder():
+    dirpath = filedialog.askdirectory(initialdir="'C:\'")
+    folder_var.set(dirpath)
+
+def browse_file():
+    filepath = filedialog.askopenfilename(initialdir=folder_var.get())
+    file_var.set(filepath)
+
+def run():
+    delimiter = delimiter_var.get()
+    output_thresholds = [int(x.strip()) for x in thresholds_var.get().split(',')]
+    ran(file_var.get(), folder_var.get(), delimiter, output_thresholds)
+
+root = tk.Tk()
+root.title("File Splitter")
+root.configure(bg="#3a6686")
+
+folder_var = tk.StringVar()
+file_var = tk.StringVar()
+delimiter_var = tk.StringVar()
+thresholds_var = tk.StringVar()
+
+label_font = ('Arial', 12)
+entry_font = ('Arial', 12)
+button_font = ('Arial', 10)
+
+tk.Label(root, text="Folder:", font=label_font, bg="#325874", fg="#94b8d1").grid(row=0, column=0, sticky='w', pady=5)
+tk.Entry(root, textvariable=folder_var, font=entry_font, width=60, bg="#3a6686", fg="#94b8d1").grid(row=0, column=1, padx=10, pady=5)
+tk.Button(root, text="Browse", command=browse_folder, font=button_font, bg="#4981a9", fg="#94b8d1").grid(row=0, column=2, padx=10, pady=5)
+
+tk.Label(root, text="File:", font=label_font, bg="#325874", fg="#94b8d1").grid(row=1, column=0, sticky='w', pady=5)
+tk.Entry(root, textvariable=file_var, font=entry_font, width=60, bg="#3a6686", fg="#94b8d1").grid(row=1, column=1, padx=10, pady=5)
+tk.Button(root, text="Browse", command=browse_file, font=button_font, bg="#4981a9", fg="#94b8d1").grid(row=1, column=2, padx=10, pady=5)
+
+tk.Label(root, text="Delimiter:", font=label_font, bg="#325874", fg="#94b8d1").grid(row=2, column=0, sticky='w', pady=5)
+tk.Entry(root, textvariable=delimiter_var, font=entry_font, width=60, bg="#3a6686", fg="#94b8d1").grid(row=2, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Thresholds (comma-separated):", font=label_font, bg="#325874", fg="#94b8d1").grid(row=3, column=0, sticky='w', pady=5)
+tk.Entry(root, textvariable=thresholds_var, font=entry_font, width=60, bg="#3a6686", fg="#94b8d1").grid(row=3, column=1, padx=10, pady=5)
+
+tk.Button(root, text="Run", command=run, font=button_font, bg="#679abe", fg="#94b8d1").grid(row=4, column=1, pady=10)
+
+root.mainloop()
